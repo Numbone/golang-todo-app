@@ -1,8 +1,12 @@
 package service
 
-import "github.com/Numbone/golang-todo-app/pkg/repository"
+import (
+	golang_todo_app "github.com/Numbone/golang-todo-app"
+	"github.com/Numbone/golang-todo-app/pkg/repository"
+)
 
 type Authorization interface {
+	CreateUser(user golang_todo_app.User) (int, error)
 }
 
 type TodoList interface {
