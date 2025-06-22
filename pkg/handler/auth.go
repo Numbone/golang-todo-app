@@ -13,7 +13,11 @@ func (h *Handler) signUp(c *gin.Context) {
 		NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	h.services
+	id, err := h.services.Authorization.CreateUser(input)
+	if err != nil {
+		NewErrorResponse(c, http.StatusUnauthorized, err.Error())
+	}
+	c.JSON(http.StatusOK, gin.H{"id": id})
 }
 
 func (h *Handler) signIn(c *gin.Context) {

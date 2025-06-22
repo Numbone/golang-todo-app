@@ -6,7 +6,7 @@ import (
 )
 
 type Authorization interface {
-	CreateUser(user *golang_todo_app.User) (int, err)
+	CreateUser(user golang_todo_app.User) (int, error)
 }
 
 type TodoList interface {
@@ -22,5 +22,7 @@ type Repository struct {
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
-	return &Repository{}
+	return &Repository{
+		Authorization: NewAuthPostgres(db),
+	}
 }
