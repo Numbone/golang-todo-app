@@ -4,6 +4,8 @@ import (
 	"fmt"
 	golang_todo_app "github.com/Numbone/golang-todo-app"
 	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
+	"strings"
 )
 
 type TodoListPostgres struct {
@@ -90,5 +92,38 @@ func (r *TodoListPostgres) Delete(userId int, listId int) error {
 	)
 
 	_, err := r.db.Exec(query, userId, listId)
+	return err
+}
+
+func (r *TodoListPostgres) Update(userId, id int, input golang_todo_app.UpdateListInput) error {
+	setValues := make([]string, 0)
+	args := make([]interface{}, 0)
+	argId := 1
+
+	if input.Title != nil {
+		setValues = append(setValues, fmt.Sprintf("title=$%d", argId))
+		args = append(args, *input.Title)
+		argId++
+	}
+	if input.Description != nil {
+		setValues = append(setValues, fmt.Sprintf("description=$%d", argId))
+		args = append(args, *input.Description)
+		argId++
+	}
+
+	setQuery := strings.Join(setValues, ", ")
+
+	query := fmt.Sprintf(`UPDATE %s tl
+	SET %s
+	FROM %s ul
+	WHERE tl.id = ul.list_id
+	AND ul.list_id = $%d
+	AND ul.user_id = $%d`,
+		todoListsTable, setQuery, usersListsTable, argId, argId+1)
+	args = append(args, id, userId)
+
+	logrus.Debug("updateQuery: %s", query)
+	logrus.Debug("args: %#v", args)
+	_, err := r.db.Exec(query, args...)
 	return err
 }
