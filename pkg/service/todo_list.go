@@ -24,3 +24,11 @@ func (s *TodoListService) GetAll(userId int) ([]golang_todo_app.TodoList, error)
 func (s *TodoListService) GetById(userId int, listId int) (golang_todo_app.TodoList, error) {
 	return s.repo.GetById(userId, listId)
 }
+
+//func (s *TodoListService) Update(userId int, list golang_todo_app.TodoList) error {
+//
+//}
+
+func (s *TodoListService) Delete(userId int, listId int) error {
+	return s.repo.Delete(userId, listId)
+}
