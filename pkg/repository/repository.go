@@ -21,6 +21,9 @@ type TodoList interface {
 type TodoItem interface {
 	Create(listId int, item golang_todo_app.TodoItem) (int, error)
 	GetAll(userId, listId int) ([]golang_todo_app.TodoItem, error)
+	GetById(userId, itemId int) (golang_todo_app.TodoItem, error)
+	Delete(userId, itemId int) error
+	Update(userId, itemId int, input golang_todo_app.UpdateItemInput) error
 }
 
 type Repository struct {
