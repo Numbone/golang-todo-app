@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/Numbone/golang-todo-app"
 	"github.com/Numbone/golang-todo-app/pkg/handler"
 	"github.com/Numbone/golang-todo-app/pkg/repository"
@@ -10,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"os"
+	"os/signal"
 )
 
 func main() {
@@ -37,8 +39,25 @@ func main() {
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 	srv := new(golang_todo_app.Server)
-	if err := srv.Run(":"+viper.GetString("port"), handlers.InitRoutes()); err != nil {
-		logrus.Fatalf("error occured while running http server: %s", err.Error())
+	go func() {
+		if err := srv.Run(":"+viper.GetString("port"), handlers.InitRoutes()); err != nil {
+			logrus.Fatalf("error occured while running http server: %s", err.Error())
+		}
+	}()
+	logrus.Println("server started")
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+
+	logrus.Println("server stopped")
+
+	if err = srv.Stop(context.Background()); err != nil {
+		logrus.Fatalf("error occured while stopping server: %s", err.Error())
+	}
+
+	if err := db.Close(); err != nil {
+		logrus.Errorf("error occured while closing db connection: %s", err.Error())
 	}
 }
 
